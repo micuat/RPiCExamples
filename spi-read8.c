@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
       {
 
           int sval = analogRead(BASE + i);
+          sval -= 750 + 0;
+          if(sval < 0) sval = 0;
           printf("%4i ", sval);
       }
       printf("\n");

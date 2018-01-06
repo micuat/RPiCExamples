@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <math.h>
 
@@ -89,14 +90,32 @@ int main(int argc, char *argv[])
    usleep(20 * 1000);
 
    // osc init
+   // open a socket to listen for datagrams (i.e. UDP packets) on port 9000
+   const int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+   printf("socket: %d\n", fd);
+   fcntl(fd, F_SETFL, O_NONBLOCK); // set the socket to non-blocking
+   struct sockaddr_in sin;
+   memset((char *)&sin, 0, sizeof(struct sockaddr_in));
+   sin.sin_family = AF_INET;
+   sin.sin_port = htons(9000);
+   //sin.sin_addr.s_addr = inet_addr("127.0.0.1");//INADDR_ANY;
+   int atonres = inet_aton("127.0.0.1", &sin.sin_addr);
+   printf("aton result: %d\n", atonres);
+   int bindres = bind(fd, (struct sockaddr *) &sin, sizeof(struct sockaddr_in));
+   printf("bind result: %d\n", bindres);
+   //printf("tinyosc is now listening on port 9000.\n");
+   //printf("Press Ctrl+C to stop.\n");
+
    char buffer[2048]; // declare a 2Kb buffer to read packet data into
 
    printf("Starting write tests:\n");
    int len = 0;
-   len = tosc_writeMessage(buffer, sizeof(buffer), "/address", "fs",
-      1.0f, "hello world");
+   len = tosc_writeMessage(buffer, sizeof(buffer), "/address", "s",
+      "hello world");
    tosc_printOscBuffer(buffer, len);
-   // send(socket_fd, buffer, len, 0);
+   //printf("sent len: %d\n", send(fd, buffer, len, 0));
+   int sentlen = sendto(fd, buffer, len, 0, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
+   printf("sent len: %d\n", sentlen);
    printf("done.\n");
 
    while (1)
