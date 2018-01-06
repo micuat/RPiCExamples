@@ -8,7 +8,7 @@ spi-read8: spi-read8.c
 	gcc -Wall -o spi-read8 spi-read8.c -lwiringPi
 
 orient3d: orient3d.c
-	gcc -Wall -o orient3d orient3d.c -lwiringPi
+	gcc -Wall -I../tinyosc -o orient3d orient3d.c ../tinyosc/tinyosc.c -lwiringPi -lm
 
 movearound: movearound.c
 	gcc -Wall -o movearound movearound.c -lwiringPi
