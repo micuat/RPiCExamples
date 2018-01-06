@@ -98,13 +98,10 @@ int main(int argc, char *argv[])
    memset((char *)&sin, 0, sizeof(struct sockaddr_in));
    sin.sin_family = AF_INET;
    sin.sin_port = htons(9000);
-   //sin.sin_addr.s_addr = inet_addr("127.0.0.1");//INADDR_ANY;
    int atonres = inet_aton("127.0.0.1", &sin.sin_addr);
    printf("aton result: %d\n", atonres);
    int bindres = bind(fd, (struct sockaddr *) &sin, sizeof(struct sockaddr_in));
    printf("bind result: %d\n", bindres);
-   //printf("tinyosc is now listening on port 9000.\n");
-   //printf("Press Ctrl+C to stop.\n");
 
    char buffer[2048]; // declare a 2Kb buffer to read packet data into
 
@@ -150,6 +147,21 @@ int main(int argc, char *argv[])
       float yaw = atan2f(siny, cosy) / M_PI * 180;
 
       printf("roll = %7.2f, pitch = %7.2f, yaw = %7.2f\n", roll, pitch, yaw);
+
+      int len = 0;
+      char v0[50];
+      char v1[50];
+      char v2[50];
+      snprintf(v0, 50, "%f", roll);
+      snprintf(v1, 50, "%f", pitch);
+      snprintf(v2, 50, "%f", yaw);
+      len = tosc_writeMessage(buffer, sizeof(buffer), "/n/pd/bno", "iii",
+         (int)(x*100), (int)(y*100), (int)(z*100));
+      //len = tosc_writeMessage(buffer, sizeof(buffer), "/n/pd/bno", "sss",
+      //   (double)roll, (double)pitch, (double)yaw);
+      //   v0, v1, v2);
+      //tosc_printOscBuffer(buffer, len);
+      sendto(fd, buffer, len, 0, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
    }
    return 0;
 }
