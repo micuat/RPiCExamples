@@ -224,11 +224,14 @@ int main(int argc, char *argv[])
       snprintf(v2, 50, "%f", yaw);
       len = tosc_writeMessage(buffer, sizeof(buffer), "/n/pd/bno", "iii",
          (int)(x*100), (int)(y*100), (int)(z*100));
-      //len = tosc_writeMessage(buffer, sizeof(buffer), "/n/pd/bno", "sss",
-      //   (double)roll, (double)pitch, (double)yaw);
-      //   v0, v1, v2);
-      //tosc_printOscBuffer(buffer, len);
       sendto(fd, buffer, len, 0, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
+
+      for(int i = 0; i < 8; i++) {
+          if(touched & (1 << i)) {
+            len = tosc_writeMessage(buffer, sizeof(buffer), "/n/pd/mpr", "i", i);
+            sendto(fd, buffer, len, 0, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
+          }
+      }
    }
    return 0;
 }
